@@ -7,7 +7,6 @@ Created on Mon Nov 13 14:56:51 2023
 
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
 from fpdf import FPDF
 from datetime import datetime
 import os
