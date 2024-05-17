@@ -15,30 +15,36 @@ current_date_time = datetime.now().strftime("%Y-%m")
 
 
 
-def load_CID(file):
+def load_file(file):
     
     with open(file, "r", encoding="unicode_escape") as file:
-        CID_list = list(filter(None, (line.rstrip() for line in file)))
-    return(CID_list)
+        List = list(filter(None, (line.rstrip() for line in file)))
+    return(List)
+
+
 
 def download_image(CID_list):
-
+    
     for CID in CID_list:
+        if os.path.isfile(os.path.join("image", f"{CID}.png")):
+            print(f" {CID}.png already exist in ./image \n Skip Pubchem image search \n\n")
+            
+        else: 
         # Construct the URL for the chemical search
-        search_url = 'https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=' + str(CID)+"&t=l"
-        print(f"Searching for: {CID}")
+            search_url = 'https://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid=' + str(CID)+"&t=l"
+            print(f"Searching for: {CID}")
 
         # Make a request to the search URL
-        search_response = requests.get(search_url)
+            search_response = requests.get(search_url)
 
-        if search_response.status_code == 200:
+            if search_response.status_code == 200:
             # Parse the HTML content using BeautifulSoup
-                    image_path = os.path.join("image", f"{CID}.png")
-                    with open(image_path, 'wb') as file:
-                        file.write(search_response.content)
-                        print('Image downloaded successfully.')
-        else:
-             print(f'Failed to download image. Status code: {search_response.status_code} \n Verify CID: {CID}')
+                        image_path = os.path.join("image", f"{CID}.png")
+                        with open(image_path, 'wb') as file:
+                            file.write(search_response.content)
+                            print('Image downloaded successfully.')
+            else:
+                print(f'Failed to download image. Status code: {search_response.status_code} \n Verify CID: {CID}')
 
 
 # Example usage
@@ -49,20 +55,25 @@ def Print_Cell(x,y):
 
 def Create_sticker(x,y,n):
 #Image
+    x = x +0.2
     pdf.set_xy(x,y)
     image_path = os.path.join("image", CID_list[n] + ".png")
     pdf.image(image_path,w=0.5,h=0.5)
     
     
     pdf.set_xy(x+0.5,y)
-    pdf.cell(2,0.5/4, text ="Solvant:")
+    pdf.cell(2,0.5/4, text ="Solvant: "+Solvant_list[n])
 
     
 
     #CID
     pdf.set_xy(x+0.5,y+0.5/4)
     pdf.cell(2,0.5/4, text ="CID: "+CID_list[n])
-
+    #ppm
+    
+    pdf.set_xy(x+1.55,y+0.5/4)
+    pdf.cell(2,0.5/4, text ="ppm: " + ppm_list[n])
+    
     #DATE
     pdf.set_xy(x+0.5,y+2*0.5/4)
     pdf.cell(2,0.5/4, text ="DATE: "+str(current_date_time))
@@ -70,20 +81,24 @@ def Create_sticker(x,y,n):
     #position 
     #rangement 
     pdf.set_xy(x+1.25,y+2*0.5/4)
-    pdf.cell(2,0.5/4, text ="position ID:")
+    pdf.cell(2,0.5/4, text ="position ID: "+pos_list[n])
    
 
-    #ppm
-    pdf.set_xy(x+0.5,y+3*0.5/4-0.025)
-    pdf.cell(2,0.5/4, text ="ppm:")
+    
     
     
 
 
 x_pos = [0.47,2.97,5.47] #inch 
 y_pos = [0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10] #inch
-file ="CIDlist.txt"
-CID_list = load_CID(file)
+file_CID ="CIDlist.txt"
+file_ppm ="ppmlist.txt"
+file_pos = "poslist.txt"
+file_solvant = "solvant.txt"
+CID_list = load_file(file_CID)
+ppm_list =load_file(file_ppm)
+pos_list =load_file(file_pos)
+Solvant_list = load_file(file_solvant)
 download_image(CID_list)
 
 
